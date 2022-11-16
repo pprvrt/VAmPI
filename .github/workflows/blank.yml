@@ -1,0 +1,21 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  api_audit_job:
+    runs-on: ubuntu-latest
+    name: Audit OpenAPI files
+    steps:
+      - uses: actions/checkout@v3
+      - uses: 42Crunch/api-security-audit-action@v2
+        with:
+          api-token: ${{ secrets.API_TOKEN }}
+          min-score: 85
+          upload-to-code-scanning: true
