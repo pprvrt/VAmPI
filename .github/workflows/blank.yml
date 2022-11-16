@@ -19,3 +19,4 @@ jobs:
           api-token: ${{ secrets.API_TOKEN }}
           min-score: 85
           upload-to-code-scanning: true
+          platform-url: https://demolabs.42crunch.cloud/
