@@ -3,38 +3,144 @@
     "info": {
         "title": "VAmPI",
         "description": "OpenAPI v3 specs for VAmPI",
-        "version": "0.1"
+        "version": "1.0b"
     },
     "servers": [
         {
-            "url": "http://localhost:5000"
+            "url": "http://localhost:5002"
+        }
+    ],
+    "x-42c-response-strategies": [
+        {
+            "x-42c-strategy": {
+                "protections": [
+                    {
+                        "security-headers_0.1": {
+                            "hsts.max_age": 3600,
+                            "csp.policy": "default-src: 'self'; upgrade-insecure-requests; block-all-mixed-content"
+                        }
+                    }
+                ]
+            }
+        }
+    ],
+    "x-42c-request-strategies": [
+        {
+            "x-42c-strategy": {
+                "protections": [
+                    {
+                        "request-limiter_0.1": {
+                            "hits": 3,
+                            "window": 10,
+                            "add.retry_after": true,
+                            "key": "req_limiter_login"
+                        }
+                    }
+                ]
+            }
         }
     ],
     "components": {
+        "responses": {
+            "GenericError": {
+                "description": "Generic error",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "status": {
+                                    "type": "string",
+                                    "enum": [
+                                        "fail"
+                                    ]
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "maxLength": 256,
+                                    "pattern": "^[a-zA-Z0-9\\.'\\\" \\!]+$"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    }
+                }
+            },
+            "Invalid": {
+                "description": "Invalid request",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "status": {
+                                    "type": "string",
+                                    "enum": [
+                                        "fail"
+                                    ]
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "maxLength": 256,
+                                    "pattern": "^[a-zA-Z0-9\\.'\\\" \\!]+$"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    }
+                }
+            },
+            "Unauthorized": {
+                "description": "Unauthorized response schema",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "status": {
+                                    "type": "string",
+                                    "enum": [
+                                        "fail"
+                                    ]
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "enum": [
+                                        "Signature expired. Please log in again."
+                                    ]
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    }
+                }
+            }
+        },
         "schemas": {
             "Username": {
                 "type": "string",
                 "pattern": "^[a-z0-9]{3,16}$",
-                "example": "name1"
+                "example": "test"
             },
             "Email": {
                 "type": "string",
-                "pattern": "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$",
-                "example": "test@test.com"
+                "pattern": "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,63})$",
+                "example": "test@test.com",
+                "maxLength": 254
             },
             "Password": {
                 "type": "string",
-                "pattern": "^[a-zA-Z0-9]{16,32}$",
+                "pattern": "^[a-zA-Z0-9]{16,64}$",
                 "example": "epBdabXdT2X9hh72"
             },
             "BookTitle": {
                 "type": "string",
                 "pattern": "^[A-Za-z0-9 '\"]{1,32}$",
-                "example": "secret for bookTitle78"
+                "example": "Example book title"
             },
             "Secret": {
                 "type": "string",
-                "pattern": "^[a-zA-Z0-9]{1,64}$",
+                "pattern": "^[a-zA-Z0-9 ]{1,64}$",
                 "example": "secret for bookTitle78"
             }
         },
@@ -63,13 +169,19 @@
                                     "type": "object",
                                     "properties": {
                                         "message": {
-                                            "type": "string"
+                                            "type": "string",
+                                            "enum": [
+                                                "Database populated."
+                                            ]
                                         }
                                     },
                                     "additionalProperties": false
                                 }
                             }
                         }
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/GenericError"
                     }
                 }
             }
@@ -91,16 +203,25 @@
                                     "type": "object",
                                     "properties": {
                                         "message": {
-                                            "type": "string"
+                                            "type": "string",
+                                            "enum": [
+                                                "VAmPI the Vulnerable API"
+                                            ]
                                         },
                                         "Help": {
-                                            "type": "string"
+                                            "type": "string",
+                                            "enum": [
+                                                "VAmPI is a vulnerable on purpose API. It was created in order to evaluate the efficiency of third party tools in identifying vulnerabilities in APIs but it can also be used in learning/teaching purposes."
+                                            ]
                                         }
                                     },
                                     "additionalProperties": false
                                 }
                             }
                         }
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/GenericError"
                     }
                 }
             }
@@ -119,6 +240,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
+                                    "additionalProperties": false,
                                     "type": "object",
                                     "properties": {
                                         "users": {
@@ -141,47 +263,9 @@
                                 }
                             }
                         }
-                    }
-                }
-            }
-        },
-        "/users/v1/_debug": {
-            "get": {
-                "tags": [
-                    "users"
-                ],
-                "summary": "Retrieves all details for all users",
-                "description": "Displays all details for all users",
-                "operationId": "api_views.users.debug",
-                "responses": {
-                    "200": {
-                        "description": "See all details of the users",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "type": "object",
-                                        "properties": {
-                                            "admin": {
-                                                "type": "boolean"
-                                            },
-                                            "email": {
-                                                "$ref": "#/components/schemas/Email"
-                                            },
-                                            "password": {
-                                                "$ref": "#/components/schemas/Password"
-                                            },
-                                            "username": {
-                                                "$ref": "#/components/schemas/Username"
-                                            }
-                                        },
-                                        "additionalProperties": false
-                                    },
-                                    "maxItems": 100
-                                }
-                            }
-                        }
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/GenericError"
                     }
                 }
             }
@@ -226,7 +310,10 @@
                                     "type": "object",
                                     "properties": {
                                         "message": {
-                                            "type": "string"
+                                            "type": "string",
+                                            "enum": [
+                                                "Successfully registered. Login to receive an auth token."
+                                            ]
                                         },
                                         "status": {
                                             "type": "string",
@@ -242,8 +329,10 @@
                         }
                     },
                     "400": {
-                        "description": "Invalid request",
-                        "content": {}
+                        "$ref": "#/components/responses/Invalid"
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/GenericError"
                     }
                 }
             }
@@ -279,23 +368,27 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Sucessfully logged in user",
+                        "description": "Successfully logged in user",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "type": "object",
                                     "properties": {
                                         "auth_token": {
-                                            "type": "string"
+                                            "type": "string",
+                                            "pattern": "^([a-zA-Z0-9_=]{4,})\\.([a-zA-Z0-9_=]{4,})\\.([a-zA-Z0-9_\\-\\+\\/=]{4,})",
+                                            "maxLength": 256
                                         },
                                         "message": {
-                                            "type": "string"
+                                            "type": "string",
+                                            "enum": [
+                                                "Successfully logged in."
+                                            ]
                                         },
                                         "status": {
                                             "type": "string",
                                             "enum": [
-                                                "success",
-                                                "fail"
+                                                "success"
                                             ]
                                         }
                                     },
@@ -305,26 +398,10 @@
                         }
                     },
                     "400": {
-                        "description": "Invalid request",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "status": {
-                                            "type": "string",
-                                            "enum": [
-                                                "fail"
-                                            ]
-                                        },
-                                        "message": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "additionalProperties": false
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/Invalid"
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/GenericError"
                     }
                 }
             }
@@ -354,45 +431,22 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "type": "object",
-                                        "properties": {
-                                            "username": {
-                                                "$ref": "#/components/schemas/Username"
-                                            },
-                                            "email": {
-                                                "$ref": "#/components/schemas/Email"
-                                            }
-                                        },
-                                        "additionalProperties": false
-                                    },
-                                    "maxItems": 100
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "User not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
                                     "type": "object",
                                     "properties": {
-                                        "status": {
-                                            "type": "string",
-                                            "enum": [
-                                                "fail"
-                                            ]
+                                        "username": {
+                                            "$ref": "#/components/schemas/Username"
                                         },
-                                        "message": {
-                                            "type": "string"
+                                        "email": {
+                                            "$ref": "#/components/schemas/Email"
                                         }
                                     },
                                     "additionalProperties": false
                                 }
                             }
                         }
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/GenericError"
                     }
                 }
             },
@@ -411,8 +465,7 @@
                         "required": true,
                         "schema": {
                             "$ref": "#/components/schemas/Username"
-                        },
-                        "example": "name1"
+                        }
                     }
                 ],
                 "responses": {
@@ -424,13 +477,15 @@
                                     "type": "object",
                                     "properties": {
                                         "message": {
-                                            "type": "string"
+                                            "type": "string",
+                                            "enum": [
+                                                "User deleted."
+                                            ]
                                         },
                                         "status": {
                                             "type": "string",
                                             "enum": [
-                                                "success",
-                                                "fail"
+                                                "success"
                                             ]
                                         }
                                     },
@@ -440,7 +495,10 @@
                         }
                     },
                     "401": {
-                        "description": "User not authorized",
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "404": {
+                        "description": "User not found",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -453,7 +511,10 @@
                                             ]
                                         },
                                         "message": {
-                                            "type": "string"
+                                            "type": "string",
+                                            "enum": [
+                                                "User not found!"
+                                            ]
                                         }
                                     },
                                     "additionalProperties": false
@@ -461,9 +522,8 @@
                             }
                         }
                     },
-                    "404": {
-                        "description": "User not found",
-                        "content": {}
+                    "default": {
+                        "$ref": "#/components/responses/GenericError"
                     }
                 }
             }
@@ -510,30 +570,13 @@
                         "content": {}
                     },
                     "400": {
-                        "description": "Invalid request",
-                        "content": {}
+                        "$ref": "#/components/responses/Invalid"
                     },
                     "401": {
-                        "description": "User not authorized",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "status": {
-                                            "type": "string",
-                                            "enum": [
-                                                "fail"
-                                            ]
-                                        },
-                                        "message": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "additionalProperties": false
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/GenericError"
                     }
                 }
             }
@@ -554,8 +597,7 @@
                         "required": true,
                         "schema": {
                             "$ref": "#/components/schemas/Username"
-                        },
-                        "example": "name1"
+                        }
                     }
                 ],
                 "requestBody": {
@@ -581,30 +623,13 @@
                         "content": {}
                     },
                     "400": {
-                        "description": "Invalid request",
-                        "content": {}
+                        "$ref": "#/components/responses/Invalid"
                     },
                     "401": {
-                        "description": "User not authorized",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "status": {
-                                            "type": "string",
-                                            "enum": [
-                                                "fail"
-                                            ]
-                                        },
-                                        "message": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "additionalProperties": false
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/GenericError"
                     }
                 }
             }
@@ -636,7 +661,8 @@
                                                     "user": {
                                                         "$ref": "#/components/schemas/Username"
                                                     }
-                                                }
+                                                },
+                                                "additionalProperties": false
                                             },
                                             "maxItems": 100
                                         }
@@ -645,6 +671,9 @@
                                 }
                             }
                         }
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/GenericError"
                     }
                 }
             },
@@ -677,14 +706,17 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Sucessfully added a book",
+                        "description": "Successfully added a book",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "type": "object",
                                     "properties": {
                                         "message": {
-                                            "type": "string"
+                                            "type": "string",
+                                            "enum": [
+                                                "Book has been added."
+                                            ]
                                         },
                                         "status": {
                                             "type": "string",
@@ -700,30 +732,13 @@
                         }
                     },
                     "400": {
-                        "description": "Invalid request",
-                        "content": {}
+                        "$ref": "#/components/responses/Invalid"
                     },
                     "401": {
-                        "description": "User not authorized",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "status": {
-                                            "type": "string",
-                                            "enum": [
-                                                "fail"
-                                            ]
-                                        },
-                                        "message": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "additionalProperties": false
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/GenericError"
                     }
                 }
             }
@@ -788,7 +803,11 @@
                                             ]
                                         },
                                         "message": {
-                                            "type": "string"
+                                            "type": "string",
+                                            "enum": [
+                                                "Signature expired. Please log in again.",
+                                                "Invalid token"
+                                            ]
                                         }
                                     },
                                     "additionalProperties": false
@@ -810,13 +829,19 @@
                                             ]
                                         },
                                         "message": {
-                                            "type": "string"
+                                            "type": "string",
+                                            "enum": [
+                                                "Book not found!"
+                                            ]
                                         }
                                     },
                                     "additionalProperties": false
                                 }
                             }
                         }
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/GenericError"
                     }
                 }
             }
