@@ -5,6 +5,7 @@
         "description": "OpenAPI v3 specs for VAmPI",
         "version": "1.0b"
     },
+    "x-42c-accept-empty-security": true,
     "servers": [
         {
             "url": "http://localhost:5002"
@@ -303,7 +304,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Sucessfully created user",
+                        "description": "Successfully created user",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -318,8 +319,7 @@
                                         "status": {
                                             "type": "string",
                                             "enum": [
-                                                "success",
-                                                "fail"
+                                                "success"
                                             ]
                                         }
                                     },
@@ -339,7 +339,7 @@
         },
         "/users/v1/login": {
             "post": {
-                "x-42c-no-authentication": true,
+                "security": [],
                 "tags": [
                     "users"
                 ],
