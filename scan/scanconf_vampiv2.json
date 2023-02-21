@@ -117,13 +117,13 @@
                                 }
                             }
                         ]
-                    }                    
+                    }
                 }
             }
         }
     ],
     "authorizationTests": {
-        "BOLASwap_UserUser": {
+        "BOLASwap": {
             "key": "authentication-swapping-bola",
             "source": [
                 "bearerAuth/bearerAuth"
