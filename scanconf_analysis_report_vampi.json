@@ -1,0 +1,19 @@
+{
+  "CustomRequest": null,
+  "Paths": null,
+  "Runnable": false,
+  "Valid": false,
+  "issueCounter": 0,
+  "configurationErrors": [
+    "requests.api_views.users.update_password: Must validate one and only one schema (oneOf)",
+    "requests.api_views.users.update_password: Additional property authorizationTests is not allowed"
+  ],
+  "pathsSkipped": 0,
+  "operationsSkipped": 0,
+  "totalCoverage": {
+    "totalRequests": 0,
+    "requestsSkipped": 0,
+    "requestsHighConfidence": 0,
+    "requestsLowConfidence": 0
+  }
+}
